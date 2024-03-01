@@ -11,6 +11,7 @@ import dev.langchain4j.model.input.structured.StructuredPrompt;
 import dev.langchain4j.model.input.structured.StructuredPromptProcessor;
 import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.model.output.structured.Description;
+import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.retriever.Retriever;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.MemoryId;
@@ -53,9 +54,18 @@ public class Langchain4jDotNames {
     static final DotName BEAN_CHAT_MEMORY_PROVIDER_SUPPLIER = DotName.createSimple(
             RegisterAiService.BeanChatMemoryProviderSupplier.class);
 
+    @Deprecated(forRemoval = true)
     static final DotName RETRIEVER = DotName.createSimple(Retriever.class);
+
+    static final DotName CONTENT_RETRIEVER = DotName.createSimple(ContentRetriever.class);
+
+    @Deprecated
     static final DotName NO_RETRIEVER = DotName.createSimple(
             RegisterAiService.NoRetriever.class);
+
+    @Deprecated
+    static final DotName NO_CONTENT_RETRIEVER = DotName.createSimple(
+            RegisterAiService.NoContentRetriever.class);
 
     static final DotName AUDIT_SERVICE = DotName.createSimple(AuditService.class);
 

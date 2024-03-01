@@ -3,6 +3,7 @@ package io.quarkiverse.langchain4j.deployment;
 import static dev.langchain4j.exception.IllegalConfigurationException.illegalConfiguration;
 import static dev.langchain4j.service.ServiceOutputParser.outputFormatInstructions;
 import static io.quarkiverse.langchain4j.deployment.ExceptionUtil.illegalConfigurationForMethod;
+import static io.quarkiverse.langchain4j.deployment.Langchain4jDotNames.NO_CONTENT_RETRIEVER;
 import static io.quarkiverse.langchain4j.deployment.Langchain4jDotNames.NO_RETRIEVER;
 
 import java.io.IOException;
@@ -230,6 +231,15 @@ public class AiServicesProcessor {
                 }
             }
 
+            DotName contentRetrieverClassDotName = null;
+            AnnotationValue contentRetrieverValue = instance.value("contentRetriever");
+            if (contentRetrieverValue != null) {
+                contentRetrieverClassDotName = contentRetrieverValue.asClass().name();
+                if (NO_CONTENT_RETRIEVER.equals(contentRetrieverClassDotName)) {
+                    contentRetrieverClassDotName = null;
+                }
+            }
+
             DotName auditServiceSupplierClassName = Langchain4jDotNames.BEAN_IF_EXISTS_AUDIT_SERVICE_SUPPLIER;
             AnnotationValue auditServiceSupplierValue = instance.value("auditServiceSupplier");
             if (auditServiceSupplierValue != null) {
@@ -260,6 +270,7 @@ public class AiServicesProcessor {
                             toolDotNames,
                             chatMemoryProviderSupplierClassDotName,
                             retrieverClassDotName,
+                            contentRetrieverClassDotName,
                             auditServiceSupplierClassName,
                             moderationModelSupplierClassName,
                             cdiScope,
@@ -302,6 +313,7 @@ public class AiServicesProcessor {
         boolean needsStreamingChatModelBean = false;
         boolean needsChatMemoryProviderBean = false;
         boolean needsRetrieverBean = false;
+        boolean needsContentRetrieverBean = false;
         boolean needsAuditServiceBean = false;
         boolean needsModerationModelBean = false;
         Set<DotName> allToolNames = new HashSet<>();
@@ -322,6 +334,10 @@ public class AiServicesProcessor {
 
             String retrieverClassName = bi.getRetrieverClassDotName() != null
                     ? bi.getRetrieverClassDotName().toString()
+                    : null;
+
+            String contentRetrieverClassName = bi.getContentRetrieverClassDotName() != null
+                    ? bi.getContentRetrieverClassDotName().toString()
                     : null;
 
             String auditServiceClassSupplierName = bi.getAuditServiceClassSupplierDotName() != null
@@ -358,6 +374,7 @@ public class AiServicesProcessor {
                     .createWith(recorder.createDeclarativeAiService(
                             new DeclarativeAiServiceCreateInfo(serviceClassName, chatLanguageModelSupplierClassName,
                                     toolClassNames, chatMemoryProviderSupplierClassName, retrieverClassName,
+                                    contentRetrieverClassName,
                                     auditServiceClassSupplierName, moderationModelSupplierClassName, chatModelName,
                                     injectStreamingChatModelBean)))
                     .setRuntimeInit()
@@ -404,6 +421,11 @@ public class AiServicesProcessor {
                 needsRetrieverBean = true;
             }
 
+            if (contentRetrieverClassName != null) {
+                configurator.addInjectionPoint(ClassType.create(contentRetrieverClassName));
+                needsContentRetrieverBean = true;
+            }
+
             if (Langchain4jDotNames.BEAN_IF_EXISTS_AUDIT_SERVICE_SUPPLIER.toString().equals(auditServiceClassSupplierName)) {
                 configurator.addInjectionPoint(ParameterizedType.create(CDI_INSTANCE,
                         new Type[] { ClassType.create(Langchain4jDotNames.AUDIT_SERVICE) }, null));
@@ -429,6 +451,9 @@ public class AiServicesProcessor {
         }
         if (needsRetrieverBean) {
             unremoveableProducer.produce(UnremovableBeanBuildItem.beanTypes(Langchain4jDotNames.RETRIEVER));
+        }
+        if (needsContentRetrieverBean) {
+            unremoveableProducer.produce(UnremovableBeanBuildItem.beanTypes(Langchain4jDotNames.CONTENT_RETRIEVER));
         }
         if (needsAuditServiceBean) {
             unremoveableProducer.produce(UnremovableBeanBuildItem.beanTypes(Langchain4jDotNames.AUDIT_SERVICE));

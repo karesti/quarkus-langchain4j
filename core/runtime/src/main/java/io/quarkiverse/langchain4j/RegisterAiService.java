@@ -14,6 +14,9 @@ import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.moderation.ModerationModel;
+import dev.langchain4j.rag.content.Content;
+import dev.langchain4j.rag.content.retriever.ContentRetriever;
+import dev.langchain4j.rag.query.Query;
 import dev.langchain4j.retriever.Retriever;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
@@ -90,8 +93,16 @@ public @interface RegisterAiService {
     /**
      * Configures the way to obtain the {@link Retriever} to use (when using RAG). All tools are expected to be CDI beans
      * By default, no supplier is used.
+     *
+     * @deprecated use {@link #contentRetriever()}
      */
     Class<? extends Retriever<TextSegment>> retriever() default NoRetriever.class;
+
+    /**
+     * Configures the way to obtain the {@link ContentRetriever} to use (when using RAG). All tools are expected to be CDI beans
+     * By default, no supplier is used.
+     */
+    Class<? extends ContentRetriever> contentRetriever() default NoContentRetriever.class;
 
     /**
      * Configures the way to obtain the {@link AuditService} to use.
@@ -141,11 +152,24 @@ public @interface RegisterAiService {
 
     /**
      * Marker class to indicate that no retriever should be used
+     *
+     * @deprecated use {@link NoContentRetriever}
      */
+    @Deprecated
     final class NoRetriever implements Retriever<TextSegment> {
 
         @Override
         public List<TextSegment> findRelevant(String text) {
+            throw new UnsupportedOperationException("should never be called");
+        }
+    }
+
+    /**
+     * Marker class to indicate that no content retriever should be used
+     */
+    final class NoContentRetriever implements ContentRetriever {
+        @Override
+        public List<Content> retrieve(Query query) {
             throw new UnsupportedOperationException("should never be called");
         }
     }

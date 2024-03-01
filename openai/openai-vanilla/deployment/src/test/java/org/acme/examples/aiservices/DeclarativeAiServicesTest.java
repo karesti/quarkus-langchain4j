@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import dev.langchain4j.rag.content.Content;
+import dev.langchain4j.rag.content.retriever.ContentRetriever;
+import dev.langchain4j.rag.query.Query;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -41,7 +44,6 @@ import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
-import dev.langchain4j.retriever.Retriever;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
@@ -119,27 +121,27 @@ public class DeclarativeAiServicesTest {
     }
 
     @Singleton
-    public static class DummyRetriever implements Retriever<TextSegment> {
+    public static class DummyContentRetriever implements ContentRetriever {
 
         @Override
-        public List<TextSegment> findRelevant(String text) {
-            return List.of(TextSegment.from("dummy"));
+        public List<Content> retrieve(Query query) {
+            return List.of(new Content(TextSegment.from("dummy")));
         }
     }
 
-    @RegisterAiService(retriever = DummyRetriever.class)
-    interface AssistantWithRetriever {
+    @RegisterAiService(contentRetriever = DummyContentRetriever.class)
+    interface AssistantWithContentRetriever {
 
         String chat(String message);
     }
 
     @Inject
-    AssistantWithRetriever assistantWithRetriever;
+    AssistantWithContentRetriever assistantWithContentRetriever;
 
     @Test
     @ActivateRequestContext
     public void test_simple_instruction_with_retriever() throws IOException {
-        String result = assistantWithRetriever.chat("Tell me a joke about developers");
+        String result = assistantWithContentRetriever.chat("Tell me a joke about developers");
         assertThat(result).isNotBlank();
 
         assertSingleRequestMessage(getRequestAsMap(),

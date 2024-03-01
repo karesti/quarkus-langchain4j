@@ -18,6 +18,7 @@ import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.moderation.ModerationModel;
+import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.retriever.Retriever;
 import io.quarkiverse.langchain4j.ModelName;
 import io.quarkiverse.langchain4j.RegisterAiService;
@@ -141,6 +142,11 @@ public class AiServicesRecorder {
                     if (info.getRetrieverClassName() != null) {
                         quarkusAiServices.retriever((Retriever<TextSegment>) creationalContext.getInjectedReference(
                                 Thread.currentThread().getContextClassLoader().loadClass(info.getRetrieverClassName())));
+                    }
+
+                    if (info.getContentRetrieverClassName() != null) {
+                        quarkusAiServices.contentRetriever((ContentRetriever) creationalContext.getInjectedReference(
+                                Thread.currentThread().getContextClassLoader().loadClass(info.getContentRetrieverClassName())));
                     }
 
                     if (info.getAuditServiceClassSupplierName() != null) {
