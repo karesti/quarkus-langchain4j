@@ -2,8 +2,6 @@ package io.quarkiverse.langchain4j.infinispan;
 
 import java.util.Map;
 
-import org.infinispan.commons.util.Version;
-
 import io.smallrye.config.PropertiesConfigSource;
 import io.smallrye.config.SmallRyeConfigBuilder;
 import io.smallrye.config.SmallRyeConfigBuilderCustomizer;
@@ -20,7 +18,7 @@ public class DevServicesConfigBuilderCustomizer implements SmallRyeConfigBuilder
         builder.withSources(
                 new PropertiesConfigSource(
                         Map.of("quarkus.infinispan-client.devservices.image-name",
-                                "quay.io/infinispan/server:" + Version.getMajorMinor()),
+                                "quay.io/infinispan/server:16.0"),
                         "quarkus-langchain4j-infinispan", 50));
     }
 }
