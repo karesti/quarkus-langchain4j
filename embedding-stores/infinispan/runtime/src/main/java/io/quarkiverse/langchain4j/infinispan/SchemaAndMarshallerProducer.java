@@ -36,4 +36,5 @@ public class SchemaAndMarshallerProducer {
     public MessageMarshaller langchainItemMarshaller() {
         return new LangchainItemMarshaller(infinispanEmbeddingStoreConfigHandle.get().dimension());
     }
+
 }
